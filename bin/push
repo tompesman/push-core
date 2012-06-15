@@ -1,0 +1,27 @@
+#!/usr/bin/env ruby
+
+require 'optparse'
+require 'push'
+
+foreground = false
+environment = ARGV[0]
+banner = 'Usage: push <Rails environment> [options]'
+ARGV.options do |opts|
+  opts.banner = banner
+  opts.on('-f', '--foreground', 'Run in the foreground.') { foreground = true }
+  opts.on('-v', '--version', 'Print this version of push.') { puts "push #{Push::VERSION}"; exit }
+  opts.on('-h', '--help', 'You\'re looking at it.') { puts opts; exit }
+  opts.parse!
+end
+
+if environment.nil?
+  puts banner
+  exit 1
+end
+
+ENV['RAILS_ENV'] = environment
+load 'config/environment.rb'
+
+require 'push/daemon'
+
+Push::Daemon.start(environment, foreground)
