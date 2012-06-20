@@ -29,7 +29,7 @@ module Push
         begin
           with_database_reconnect_and_retry(name) do
             if Push::Daemon.delivery_queue.notifications_processed?
-              Push::Message.ready_for_delivery.each do |notification|
+              Push::Message.ready_for_delivery.find_each do |notification|
                 Push::Daemon.delivery_queue.push(notification)
               end
             end
