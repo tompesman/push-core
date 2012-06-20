@@ -2,9 +2,9 @@ module Push
   module Daemon
     class Logger
       def initialize(options)
-        @options = options
-        log_path = File.join(Rails.root, 'log', 'push.log')
-        @logger = ActiveSupport::BufferedLogger.new(log_path, Rails.logger.level)
+        log_file = File.open(File.join(Rails.root, 'log', 'push.log'), 'w')
+        log_file.sync = true
+        @logger = ActiveSupport::BufferedLogger.new(log_file, Rails.logger.level)
         @logger.auto_flushing = Rails.logger.respond_to?(:auto_flushing) ? Rails.logger.auto_flushing : true
       end
 
