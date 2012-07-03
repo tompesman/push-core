@@ -2,6 +2,7 @@ module Push
   module Daemon
     class Logger
       def initialize(options)
+        @options = options
         log_file = File.open(File.join(Rails.root, 'log', 'push.log'), 'w')
         log_file.sync = true
         @logger = ActiveSupport::BufferedLogger.new(log_file, Rails.logger.level)
