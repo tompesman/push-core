@@ -12,9 +12,13 @@ For __APNS__ (iOS: Apple Push Notification Services):
 
     gem push-apns
     
-For __C2DM__ (Android: Cloud to Device Messaging):
+For __C2DM__ (Android: Cloud to Device Messaging, deprecated):
 
     gem push-c2dm
+
+For __GCM__ (Android: Google Cloud Messaging):
+
+    gem push-gcm
 
 And run `bundle install` to install the gems.
 
@@ -44,9 +48,15 @@ Push::Daemon::Builder.new do
     :email => "",
     :password => ""
   }
+
+  provider :gcm,
+  {
+    :connections => 2,
+    :key => 'api key'
+  }
 end
 ```
-Remove the provider you're not using. Add your email and password to enable C2DM. For APNS follow the 'Generating Certificates' below.
+Remove the provider you're not using. Add your email and password to enable C2DM and add the API key for GCM. For APNS follow the 'Generating Certificates' below.
 
 
 ### Generating Certificates
@@ -80,6 +90,11 @@ Push::MessageApns.new(device: "<APNS device_token here>", alert: 'Hello World', 
 C2DM:
 ```ruby
 Push::MessageC2dm.new(device: "<C2DM registration_id here>", payload: { message: "Hello World" }, collapse_key: "MSG").save
+```
+
+GCM:
+```ruby
+Push::MessageGcm.new(device: "<C2DM registration_id here>", payload: { message: "Hello World" }, collapse_key: "MSG").save
 ```
 
 ## Thanks

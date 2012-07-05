@@ -16,4 +16,10 @@ Push::Daemon::Builder.new do
     :email => "",
     :password => ""
   }
+
+  provider :gcm,
+  {
+    :connections => 2,
+    :key => 'api key'
+  }
 end
