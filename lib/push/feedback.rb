@@ -3,6 +3,7 @@ module Push
     self.table_name = 'push_feedback'
 
     validates :device, :presence => true
+    validates :follow_up, :presence => true
     validates :failed_at, :presence => true
   end
 end

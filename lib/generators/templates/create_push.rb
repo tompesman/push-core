@@ -19,7 +19,9 @@ class CreatePush < ActiveRecord::Migration
     create_table :push_feedback do |t|
       t.string    :device,                :null => false
       t.string    :type,                  :null => false
+      t.string    :follow_up,             :null => false
       t.timestamp :failed_at,             :null => false
+      t.text      :properties,            :null => true
       t.timestamps
     end
 
