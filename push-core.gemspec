@@ -10,8 +10,8 @@ Gem::Specification.new do |s|
   s.authors     = ["Tom Pesman"]
   s.email       = ["tom@tnux.net"]
   s.homepage    = "https://github.com/tompesman/push-core"
-  s.summary     = "Core of the modular push daemon."
-  s.description = "Push daemon for push notification services like APNS and C2DM."
+  s.summary     = "Core of the push daemon."
+  s.description = "Push daemon for push notification services like APNS (iOS/Apple) and GCM/C2DM (Android)."
 
   s.test_files    = `git ls-files -- {test,spec,features}/*`.split("\n")
   s.files         = `git ls-files lib`.split("\n") + ["README.md", "MIT-LICENSE"]
