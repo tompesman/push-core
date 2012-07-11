@@ -1,5 +1,7 @@
 # Push
 
+Please note this gem not yet used in production. If you want to help, please contact me.
+
 ## Installation
 
 Add to your `GemFile`
@@ -31,7 +33,18 @@ To generate the migration and the configuration files run:
 A default configuration file looks like this:
 ```ruby
 Push::Daemon::Builder.new do
-  daemon({ :poll => 2, :pid_file => "tmp/pids/push.pid", :airbrake_notify => false })
+  daemon
+  ({
+    :poll => 2,
+    :pid_file => 'tmp/pids/push.pid',
+    :airbrake_notify => false
+  })
+
+  feedback
+  ({
+    :poll => 60,
+    :processor => 'lib/push/feedback_processor'
+  })
 
   provider :apns,
   {
@@ -96,6 +109,10 @@ GCM:
 ```ruby
 Push::MessageGcm.new(device: "<C2DM registration_id here>", payload: { message: "Hello World" }, collapse_key: "MSG").save
 ```
+
+## Feedback processing
+
+The push providers return feedback in various ways and these are captured and stored in the `push_feedback` table. The installer installs the `lib/push/feedback_processor.rb` file which is by default called every 60 seconds. In this file you can process the feedback which is different for every application.
 
 ## Thanks
 
