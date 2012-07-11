@@ -9,6 +9,8 @@ require 'push/daemon/database_reconnectable'
 require 'push/daemon/delivery_queue'
 require 'push/daemon/delivery_handler'
 require 'push/daemon/delivery_handler_pool'
+require 'push/daemon/feedback/feedback_feeder'
+require 'push/daemon/feedback/feedback_handler'
 require 'push/daemon/feeder'
 require 'push/daemon/logger'
 
@@ -16,7 +18,8 @@ module Push
   module Daemon
     class << self
       attr_accessor :logger, :configuration, :delivery_queue,
-      :connection_pool, :delivery_handler_pool, :foreground, :providers
+      :connection_pool, :delivery_handler_pool, :foreground, :providers,
+      :feedback_configuration, :feedback_queue, :feedback_handler, :feedback_feeder
     end
 
     def self.start(environment, foreground)
@@ -45,6 +48,14 @@ module Push
 
       self.delivery_handler_pool = DeliveryHandlerPool.new(connection_pool.size)
       delivery_handler_pool.populate
+
+      if feedback_configuration
+        self.feedback_queue = DeliveryQueue.new
+        self.feedback_handler = Feedback::FeedbackHandler.new(Rails.root + Push::Daemon.feedback_configuration[:processor])
+        self.feedback_handler.start
+        self.feedback_feeder = Feedback::FeedbackFeeder.new(Push::Daemon.feedback_configuration[:poll])
+        self.feedback_feeder.start
+      end
 
       logger.info('[Daemon] Ready')
 

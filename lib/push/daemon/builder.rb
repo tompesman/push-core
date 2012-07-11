@@ -9,6 +9,10 @@ module Push
         Push::Daemon.configuration = options
       end
 
+      def feedback(options)
+        Push::Daemon.feedback_configuration = options
+      end
+
       def provider(klass, options)
         begin
           middleware = Push::Daemon.const_get("#{klass}".camelize)

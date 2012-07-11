@@ -15,8 +15,9 @@ class PushGenerator < Rails::Generators::Base
   end
 
   def copy_config
-    copy_file "development.rb", "config/push/development.rb"
-    copy_file "staging.rb",     "config/push/staging.rb"
-    copy_file "production.rb",  "config/push/production.rb"
+    copy_file "development.rb",         "config/push/development.rb"
+    copy_file "staging.rb",             "config/push/staging.rb"
+    copy_file "production.rb",          "config/push/production.rb"
+    copy_file "feedback_processor.rb",  "lib/push/feedback_processor.rb"
   end
 end

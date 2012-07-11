@@ -21,11 +21,13 @@ class CreatePush < ActiveRecord::Migration
       t.string    :type,                  :null => false
       t.string    :follow_up,             :null => false
       t.timestamp :failed_at,             :null => false
+      t.boolean   :processed,             :null => false, :default => false
+      t.timestamp :processed_at,          :null => true
       t.text      :properties,            :null => true
       t.timestamps
     end
 
-    add_index :push_feedback, :device
+    add_index :push_feedback, :processed
   end
 
   def self.down
