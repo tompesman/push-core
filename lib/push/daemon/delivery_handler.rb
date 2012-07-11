@@ -1,8 +1,6 @@
 module Push
   module Daemon
     class DeliveryHandler
-      include DatabaseReconnectable
-
       attr_reader :name
       STOP = 0x666
 
