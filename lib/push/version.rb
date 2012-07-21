@@ -1,3 +1,3 @@
 module Push
-  VERSION = "0.0.1.pre2"
+  VERSION = "0.0.1.pre4"
 end
