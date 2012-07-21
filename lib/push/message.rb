@@ -6,6 +6,7 @@ module Push
     include Push::Daemon::DatabaseReconnectable
     self.table_name = "push_messages"
 
+    validates :app, :presence => true
     validates :device, :presence => true
 
     scope :ready_for_delivery, lambda { where('delivered = ? AND failed = ? AND (deliver_after IS NULL OR deliver_after < ?)', false, false, Time.now) }
@@ -22,7 +23,7 @@ module Push
           self.save!(:validate => false)
         end
 
-        Push::Daemon.logger.info("Message #{id} delivered to #{device}")
+        Push::Daemon.logger.info("[#{connection.name}] Message #{id} delivered to #{device}")
       rescue Push::DeliveryError, Push::DisconnectionError => error
         handle_delivery_error(error, connection)
         raise

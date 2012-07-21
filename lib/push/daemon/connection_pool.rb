@@ -23,7 +23,7 @@ module Push
       end
 
       def size
-        @connections.size
+        @connections.values.collect{|x| x.length }.inject(:+)
       end
     end
   end

@@ -8,13 +8,13 @@ module Push
         "Feeder"
       end
 
-      def self.start(foreground)
-        reconnect_database unless foreground
+      def self.start(config)
+        reconnect_database unless config.foreground
 
         loop do
           break if @stop
           enqueue_notifications
-          interruptible_sleep Push::Daemon.configuration[:poll]
+          interruptible_sleep config.push_poll
         end
       end
 
@@ -28,10 +28,9 @@ module Push
       def self.enqueue_notifications
         begin
           with_database_reconnect_and_retry(name) do
-            if Push::Daemon.delivery_queue.notifications_processed?
-              Push::Message.ready_for_delivery.find_each do |notification|
-                Push::Daemon.delivery_queue.push(notification)
-              end
+            Push::Message.ready_for_delivery.find_each do |notification|
+              ready_apps = Push::Daemon::App.ready
+              Push::Daemon::App.deliver(notification) if ready_apps.include?(notification.app)
             end
           end
         rescue StandardError => e

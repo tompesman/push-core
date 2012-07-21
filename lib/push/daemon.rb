@@ -1,65 +1,39 @@
 require 'thread'
-require 'push/daemon/builder'
 require 'push/daemon/interruptible_sleep'
 require 'push/daemon/delivery_error'
 require 'push/daemon/disconnection_error'
-require 'push/daemon/pool'
 require 'push/daemon/connection_pool'
 require 'push/daemon/database_reconnectable'
 require 'push/daemon/delivery_queue'
 require 'push/daemon/delivery_handler'
-require 'push/daemon/delivery_handler_pool'
+require 'push/daemon/feedback'
 require 'push/daemon/feedback/feedback_feeder'
 require 'push/daemon/feedback/feedback_handler'
 require 'push/daemon/feeder'
 require 'push/daemon/logger'
+require 'push/daemon/app'
 
 module Push
   module Daemon
     class << self
-      attr_accessor :logger, :configuration, :delivery_queue,
-      :connection_pool, :delivery_handler_pool, :foreground, :providers,
-      :feedback_configuration, :feedback_queue, :feedback_handler, :feedback_feeder
+      attr_accessor :logger, :config
     end
 
-    def self.start(environment, foreground)
-      self.providers = []
-      @foreground = foreground
+    def self.start(environment, config)
+      self.config = config
+      self.logger = Logger.new(:foreground => config.foreground, :airbrake_notify => config.airbrake_notify)
       setup_signal_hooks
-
-      require File.join(Rails.root, 'config', 'push', environment + '.rb')
-
-      self.logger = Logger.new(:foreground => foreground, :airbrake_notify => configuration[:airbrake_notify])
-
-      self.delivery_queue = DeliveryQueue.new
-
-      daemonize unless foreground
-
+      daemonize unless config.foreground
       write_pid_file
 
-      dbconnections = 0
-      self.connection_pool = ConnectionPool.new
-      self.providers.each do |provider|
-        self.connection_pool.populate(provider)
-        dbconnections += provider.totalconnections
-      end
-
-      rescale_poolsize(dbconnections)
-
-      self.delivery_handler_pool = DeliveryHandlerPool.new(connection_pool.size)
-      delivery_handler_pool.populate
-
-      if feedback_configuration
-        self.feedback_queue = DeliveryQueue.new
-        self.feedback_handler = Feedback::FeedbackHandler.new(Rails.root + Push::Daemon.feedback_configuration[:processor])
-        self.feedback_handler.start
-        self.feedback_feeder = Feedback::FeedbackFeeder.new(Push::Daemon.feedback_configuration[:poll])
-        self.feedback_feeder.start
-      end
+      App.load
+      App.start
+      Feedback.load(config)
+      Feedback.start
+      rescale_poolsize(App.database_connections + Feedback.database_connections)
 
       logger.info('[Daemon] Ready')
-
-      Push::Daemon::Feeder.start(foreground)
+      Feeder.start(config)
     end
 
     protected
@@ -91,14 +65,16 @@ module Push
     end
 
     def self.shutdown
-      puts "\nShutting down..."
-      Push::Daemon::Feeder.stop
-      Push::Daemon.delivery_handler_pool.drain if Push::Daemon.delivery_handler_pool
+      print "\nShutting down..."
+      Feeder.stop
+      Feedback.stop
+      App.stop
 
-      self.providers.each do |provider|
-        provider.stop
+      while Thread.list.count > 1
+        sleep 0.1
+        print "."
       end
-
+      print "\n"
       delete_pid_file
     end
 
@@ -116,19 +92,19 @@ module Push
     end
 
     def self.write_pid_file
-      if !configuration[:pid_file].blank?
+      if !config[:pid_file].blank?
         begin
           File.open(configuration[:pid_file], 'w') do |f|
             f.puts $$
           end
         rescue SystemCallError => e
-          logger.error("Failed to write PID to '#{configuration[:pid_file]}': #{e.inspect}")
+          logger.error("Failed to write PID to '#{config[:pid_file]}': #{e.inspect}")
         end
       end
     end
 
     def self.delete_pid_file
-      pid_file = configuration[:pid_file]
+      pid_file = config[:pid_file]
       File.delete(pid_file) if !pid_file.blank? && File.exists?(pid_file)
     end
   end

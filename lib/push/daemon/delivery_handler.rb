@@ -2,14 +2,15 @@ module Push
   module Daemon
     class DeliveryHandler
       attr_reader :name
-      STOP = 0x666
 
-      def initialize(i)
-        @name = "DeliveryHandler #{i}"
+      def initialize(queue, connection_pool, name)
+        @queue = queue
+        @connection_pool = connection_pool
+        @name = "DeliveryHandler #{name}"
       end
 
       def start
-        Thread.new do
+        @thread = Thread.new do
           loop do
             break if @stop
             handle_next_notification
@@ -19,26 +20,26 @@ module Push
 
       def stop
         @stop = true
-        Push::Daemon.delivery_queue.push(STOP)
+        @queue.wakeup(@thread)
       end
 
       protected
 
       def handle_next_notification
-        notification = Push::Daemon.delivery_queue.pop
-
-        if notification == STOP
+        begin
+          notification = @queue.pop
+        rescue DeliveryQueue::WakeupError
           return
         end
 
         begin
-          connection = Push::Daemon.connection_pool.checkout(notification.use_connection)
+          connection = @connection_pool.checkout(notification.use_connection)
           notification.deliver(connection)
         rescue StandardError => e
           Push::Daemon.logger.error(e)
         ensure
-          Push::Daemon.connection_pool.checkin(connection)
-          Push::Daemon.delivery_queue.notification_processed
+          @connection_pool.checkin(connection)
+          @queue.notification_processed
         end
       end
     end

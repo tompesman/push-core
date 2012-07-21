@@ -1,6 +1,16 @@
 class CreatePush < ActiveRecord::Migration
   def self.up
+    create_table :push_configurations do |t|
+      t.string    :type,                  :null => false
+      t.string    :app,                   :null => false
+      t.text      :properties,            :null => true
+      t.boolean   :enabled,               :null => false, :default => false
+      t.integer   :connections,           :null => false, :default => 1
+      t.timestamps
+    end
+
     create_table :push_messages do |t|
+      t.string    :app,                   :null => false
       t.string    :device,                :null => false
       t.string    :type,                  :null => false
       t.text      :properties,            :null => true
@@ -17,6 +27,7 @@ class CreatePush < ActiveRecord::Migration
     add_index :push_messages, [:delivered, :failed, :deliver_after]
 
     create_table :push_feedback do |t|
+      t.string    :app,                   :null => false
       t.string    :device,                :null => false
       t.string    :type,                  :null => false
       t.string    :follow_up,             :null => false
@@ -33,5 +44,6 @@ class CreatePush < ActiveRecord::Migration
   def self.down
     drop_table :push_feedback
     drop_table :push_messages
+    drop_table :push_configurations
   end
 end

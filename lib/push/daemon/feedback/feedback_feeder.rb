@@ -33,9 +33,9 @@ module Push
         def enqueue_feedback
           begin
             with_database_reconnect_and_retry(name) do
-              if Push::Daemon.feedback_queue.notifications_processed?
+              if Push::Daemon::Feedback.queue.notifications_processed?
                 Push::Feedback.ready_for_followup.find_each do |feedback|
-                  Push::Daemon.feedback_queue.push(feedback)
+                  Push::Daemon::Feedback.queue.push(feedback)
                 end
               end
             end
