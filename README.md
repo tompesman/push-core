@@ -30,46 +30,25 @@ To generate the migration and the configuration files run:
     bundle exec rake db:migrate
 
 ## Configuration
-A default configuration file looks like this:
+
+The configuration is in the database and you add the configuration per push provider with the console (`rails c`):
+
+APNS:
 ```ruby
-Push::Daemon::Builder.new do
-  daemon
-  ({
-    :poll => 2,
-    :pid_file => 'tmp/pids/push.pid',
-    :airbrake_notify => false
-  })
-
-  feedback
-  ({
-    :poll => 60,
-    :processor => 'lib/push/feedback_processor'
-  })
-
-  provider :apns,
-  {
-    :certificate => "production.pem",
-    :certificate_password => "",
-    :sandbox => false,
-    :connections => 3,
-    :feedback_poll => 60
-  }
-
-  provider :c2dm,
-  {
-    :connections => 2,
-    :email => "",
-    :password => ""
-  }
-
-  provider :gcm,
-  {
-    :connections => 2,
-    :key => 'api key'
-  }
-end
+Push::ConfigurationApns.create(:app => 'app_name', :connections => 2, :certificate => File.read("certificate.pem"), :feedback_poll => 60, :enabled => true).save
 ```
-Remove the provider you're not using. Add your email and password to enable C2DM and add the API key for GCM. For APNS follow the 'Generating Certificates' below.
+
+C2DM
+```ruby
+Push::ConfigurationC2dm.create(:app => 'app_name', :connections => 2, :email => "<email address here>", :password => "<password here>", :enabled => true).save
+```
+
+GCM
+```ruby
+Push::ConfigurationGcm.create(:app => 'app_name', :connections => 2, :key => '<api key here>').save
+```
+
+You can have each provider per app_name and you can have more than one app_name. Use the instructions below to generate the certificate for the APNS provider.
 
 
 ### Generating Certificates
@@ -93,26 +72,48 @@ To start the daemon:
 
     bundle exec push <environment> <options>
     
-Where `<environment>` is your Rails environment and `<options>` can be `--foreground`, `--version` or `--help`.
+Where `<environment>` is your Rails environment and `<options>` can be:
+
+		-f, --foreground                 Run in the foreground.
+		-p, --pid-file PATH              Path to write PID file. Relative to Rails root unless absolute.
+		-P, --push-poll N                Frequency in seconds to check for new notifications. Default: 2.
+		-n, --airbrake-notify            Enables error notifications via Airbrake.
+		-F, --feedback-poll N            Frequency in seconds to check for feedback for the feedback processor. Default: 60. Use 0 to disable.
+		-b, --feedback-processor PATH    Path to the feedback processor. Default: lib/push/feedback_processor.
+		-v, --version                    Print this version of push.
+		-h, --help                       You're looking at it.
+
 
 ## Sending notifications
 APNS:
 ```ruby
-Push::MessageApns.new(device: "<APNS device_token here>", alert: 'Hello World', expiry: 1.day.to_i, attributes_for_device: {key: 'MSG'}).save
+Push::MessageApns.new(:app => 'app_name', device: '<APNS device_token here>', alert: 'Hello World', expiry: 1.day.to_i, attributes_for_device: {key: 'MSG'}).save
 ```
 C2DM:
 ```ruby
-Push::MessageC2dm.new(device: "<C2DM registration_id here>", payload: { message: "Hello World" }, collapse_key: "MSG").save
+Push::MessageC2dm.new(:app => 'app_name', device: '<C2DM registration_id here>', payload: { message: 'Hello World' }, collapse_key: 'MSG').save
 ```
 
 GCM:
 ```ruby
-Push::MessageGcm.new(device: "<C2DM registration_id here>", payload: { message: "Hello World" }, collapse_key: "MSG").save
+Push::MessageGcm.new(:app => 'app_name', device: '<GCM registration_id here>', payload: { message: 'Hello World' }, collapse_key: 'MSG').save
 ```
 
 ## Feedback processing
 
 The push providers return feedback in various ways and these are captured and stored in the `push_feedback` table. The installer installs the `lib/push/feedback_processor.rb` file which is by default called every 60 seconds. In this file you can process the feedback which is different for every application.
+
+## Rake Task
+
+The push-core also comes with a rake task to delete all the messages and feedback of the last 7 days or by the DAYS parameter.
+
+		bundle exec rake push:clean DAYS=2
+
+## Prerequisites
+
+* Rails 3.2 +
+* Ruby 1.9
+
 
 ## Thanks
 
