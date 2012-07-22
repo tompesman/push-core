@@ -43,34 +43,25 @@ The configuration is in the database and you add the configuration per push prov
 
 APNS ([see](https://github.com/tompesman/push-core#generating-certificates)):
 ```ruby
-Push::ConfigurationApns.create(
-    app: 'app_name',
-    connections: 2,
+Push::ConfigurationApns.create(app: 'app_name', connections: 2, enabled: true,
     certificate: File.read('certificate.pem'),
-    feedback_poll: 60,
-    enabled: true).save
+    feedback_poll: 60).save
 ```
 
 C2DM ([see](https://developers.google.com/android/c2dm/)):
 ```ruby
-Push::ConfigurationC2dm.create(
-    app: 'app_name',
-    connections: 2,
+Push::ConfigurationC2dm.create(app: 'app_name', connections: 2, enabled: true,
     email: '<email address here>',
-    password: '<password here>',
-    enabled: true).save
+    password: '<password here>').save
 ```
 
 GCM ([see](http://developer.android.com/guide/google/gcm/gs.html)):
 ```ruby
-Push::ConfigurationGcm.create(
-    app: 'app_name',
-    connections: 2,
-    key: '<api key here>',
-    enabled: true).save
+Push::ConfigurationGcm.create(app: 'app_name', connections: 2, enabled: true,
+    key: '<api key here>').save
 ```
 
-You can have each provider per app_name and you can have more than one app_name. Use the instructions below to generate the certificate for the APNS provider. If you only want to prepare the database with the configurations, you can set the `enabled` switch to `false`. Only enabled configurations will be uesed by the daemon.
+You can have each provider per app_name and you can have more than one app_name. Use the instructions below to generate the certificate for the APNS provider. If you only want to prepare the database with the configurations, you can set the `enabled` switch to `false`. Only enabled configurations will be used by the daemon.
 
 ### Generating Certificates for APNS
 
