@@ -5,7 +5,7 @@ Please note this gem not yet used in production. If you want to help, please con
 ## Features
 
 * Multi-App
-* Multi-Provider (APNS, GCM, C2DM)
+* Multi-Provider ([APNS](https://github.com/tompesman/push-apns), [GCM](https://github.com/tompesman/push-gcm), [C2DM](https://github.com/tompesman/push-c2dm))
 * Integrated feedback processing
 * Rake task to cleanup the database
 * Database for storage (no external dependencies)
@@ -45,20 +45,21 @@ APNS ([see](https://github.com/tompesman/push-core#generating-certificates)):
 ```ruby
 Push::ConfigurationApns.create(app: 'app_name', connections: 2, enabled: true,
     certificate: File.read('certificate.pem'),
-    feedback_poll: 60).save
+    feedback_poll: 60,
+    sandbox: false)
 ```
 
 C2DM ([see](https://developers.google.com/android/c2dm/)):
 ```ruby
 Push::ConfigurationC2dm.create(app: 'app_name', connections: 2, enabled: true,
     email: '<email address here>',
-    password: '<password here>').save
+    password: '<password here>')
 ```
 
 GCM ([see](http://developer.android.com/guide/google/gcm/gs.html)):
 ```ruby
 Push::ConfigurationGcm.create(app: 'app_name', connections: 2, enabled: true,
-    key: '<api key here>').save
+    key: '<api key here>')
 ```
 
 You can have each provider per app_name and you can have more than one app_name. Use the instructions below to generate the certificate for the APNS provider. If you only want to prepare the database with the configurations, you can set the `enabled` switch to `false`. Only enabled configurations will be used by the daemon.
@@ -98,29 +99,31 @@ Where `<environment>` is your Rails environment and `<options>` can be:
 ## Sending notifications
 APNS:
 ```ruby
-Push::MessageApns.new(
+Push::MessageApns.create(
     app: 'app_name',
     device: '<APNS device_token here>',
     alert: 'Hello World',
+    sound: '1.aiff',
+    badge: 1,
     expiry: 1.day.to_i, 
-    attributes_for_device: {key: 'MSG'}).save
+    attributes_for_device: {key: 'MSG'})
 ```
 C2DM:
 ```ruby
-Push::MessageC2dm.new(
+Push::MessageC2dm.create(
     app: 'app_name',
     device: '<C2DM registration_id here>',
     payload: { message: 'Hello World' },
-    collapse_key: 'MSG').save
+    collapse_key: 'MSG')
 ```
 
 GCM:
 ```ruby
-Push::MessageGcm.new(
+Push::MessageGcm.create(
     app: 'app_name',
     device: '<GCM registration_id here>',
     payload: { message: 'Hello World' },
-    collapse_key: 'MSG').save
+    collapse_key: 'MSG')
 ```
 
 ## Feedback processing
