@@ -3,10 +3,7 @@ module Push
     class Logger
       def initialize(options)
         @options = options
-        log_file = File.open(File.join(Rails.root, 'log', 'push.log'), 'w')
-        log_file.sync = true
-        @logger = ActiveSupport::BufferedLogger.new(log_file, Rails.logger.level)
-        @logger.auto_flushing = Rails.logger.respond_to?(:auto_flushing) ? Rails.logger.auto_flushing : true
+        open_log unless @options[:foreground]
       end
 
       def info(msg)
@@ -32,8 +29,19 @@ module Push
         formatted_msg = "[#{Time.now.to_s(:db)}] "
         formatted_msg << "[#{prefix}] " if prefix
         formatted_msg << msg
-        puts formatted_msg if @options[:foreground]
-        @logger.send(where, formatted_msg)
+
+        if @options[:foreground]
+          puts formatted_msg
+        else
+          @logger.send(where, formatted_msg)
+        end
+      end
+
+      def open_log
+        log_file = File.open(File.join(Rails.root, 'log', 'push.log'), 'w')
+        log_file.sync = true
+        @logger = ActiveSupport::BufferedLogger.new(log_file, Rails.logger.level)
+        @logger.auto_flushing = Rails.logger.respond_to?(:auto_flushing) ? Rails.logger.auto_flushing : true
       end
 
       def airbrake_notify(e)

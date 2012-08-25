@@ -85,7 +85,7 @@ To start the daemon:
     
 Where `<environment>` is your Rails environment and `<options>` can be:
 
-    -f, --foreground                 Run in the foreground.
+    -f, --foreground                 Run in the foreground. Log is not written.
     -p, --pid-file PATH              Path to write PID file. Relative to Rails root unless absolute.
     -P, --push-poll N                Frequency in seconds to check for new notifications. Default: 2.
     -n, --airbrake-notify            Enables error notifications via Airbrake.
