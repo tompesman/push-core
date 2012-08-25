@@ -136,6 +136,12 @@ The push-core comes with a rake task to delete all the messages and feedback of 
 
     bundle exec rake push:clean DAYS=2
 
+## Heroku
+
+Push runs on Heroku with the following line in the `Procfile`.
+
+    push: bundle exec push $RACK_ENV -f
+
 ## Prerequisites
 
 * Rails 3.2.x
