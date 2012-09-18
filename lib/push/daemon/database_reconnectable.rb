@@ -1,15 +1,17 @@
-class PGError < StandardError; end if !defined?(PGError)
-module Mysql2; class Error < StandardError; end; end if !defined?(Mysql2)
-
 module Push
   module Daemon
     module DatabaseReconnectable
-      ADAPTER_ERRORS = [ActiveRecord::StatementInvalid, PGError, Mysql2::Error]
+      def adaptor_errors
+        errors = [ActiveRecord::StatementInvalid]
+        errors << PGError if defined?(PGError)
+        errors << Mysql2::Error if defined?(Mysql2)
+        errors
+      end
 
       def with_database_reconnect_and_retry(name)
         begin
           yield
-        rescue *ADAPTER_ERRORS => e
+        rescue *adaptor_errors => e
           Push::Daemon.logger.error(e)
           database_connection_lost(name)
           retry
@@ -25,7 +27,7 @@ module Push
             reconnect_database
             check_database_is_connected
             break
-          rescue *ADAPTER_ERRORS => e
+          rescue *adaptor_errors => e
             Push::Daemon.logger.error(e, :airbrake_notify => false)
             sleep_to_avoid_thrashing
           end
