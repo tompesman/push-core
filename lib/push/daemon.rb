@@ -21,7 +21,7 @@ module Push
 
     def self.start(config)
       self.config = config
-      self.logger = Logger.new(:foreground => config.foreground, :airbrake_notify => config.airbrake_notify)
+      self.logger = Logger.new(:foreground => config.foreground, :error_notification => config.error_notification)
       setup_signal_hooks
       daemonize unless config.foreground
       write_pid_file

@@ -5,10 +5,10 @@ require 'push'
 
 environment = ARGV[0]
 
-config = Struct.new(:foreground, :pid_file, :push_poll, :airbrake_notify, :feedback_poll, :feedback_processor).new
+config = Struct.new(:foreground, :pid_file, :push_poll, :error_notification, :feedback_poll, :feedback_processor).new
 config.foreground = false
 config.push_poll = 2
-config.airbrake_notify = false
+config.error_notification = false
 config.feedback_poll = 60
 config.feedback_processor = 'lib/push/feedback_processor'
 
@@ -18,7 +18,7 @@ ARGV.options do |opts|
   opts.on('-f', '--foreground', 'Run in the foreground. Log is not written.') { config.foreground = true }
   opts.on('-p PATH', '--pid-file PATH', String, 'Path to write PID file. Relative to Rails root unless absolute.') { |path| config.pid_file = path }
   opts.on('-P N', '--push-poll N', Integer, "Frequency in seconds to check for new notifications. Default: #{config.push_poll}.") { |n| config.push_poll = n }
-  opts.on('-n', '--airbrake-notify', 'Enables error notifications via Airbrake.') { config.check_for_errors = true }
+  opts.on('-n', '--error-notification', 'Enables error notifications via Airbrake or Bugsnag.') { config.error_notification = true }
   opts.on('-F N', '--feedback-poll N', Integer, "Frequency in seconds to check for feedback for the feedback processor. Default: #{config.feedback_poll}. Use 0 to disable.") { |n| config.feedback_poll = n }
   opts.on('-b PATH', '--feedback-processor PATH', String, "Path to the feedback processor. Default: #{config.feedback_processor}.") { |n| config.feedback_processor = n }
   opts.on('-v', '--version', 'Print this version of push.') { puts "push #{Push::VERSION}"; exit }

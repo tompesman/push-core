@@ -11,7 +11,7 @@ module Push
       end
 
       def error(msg, options = {})
-        airbrake_notify(msg) if notify_via_airbrake?(msg, options)
+        error_notification(msg, options)
         log(:error, msg, 'ERROR')
       end
 
@@ -23,7 +23,7 @@ module Push
 
       def log(where, msg, prefix = nil)
         if msg.is_a?(Exception)
-          msg = "#{msg.class.name}, #{msg.message}: #{msg.backtrace.join("\n")}"
+          msg = "#{msg.class.name}, #{msg.message}: #{msg.backtrace.join("\n") if msg.backtrace}"
         end
 
         formatted_msg = "[#{Time.now.to_s(:db)}] "
@@ -44,18 +44,20 @@ module Push
         @logger.auto_flushing = Rails.logger.respond_to?(:auto_flushing) ? Rails.logger.auto_flushing : true
       end
 
-      def airbrake_notify(e)
-        return unless @options[:airbrake_notify] == true
+      def error_notification(e, options)
+        return unless do_error_notification?(e, options)
 
         if defined?(Airbrake)
           Airbrake.notify_or_ignore(e)
         elsif defined?(HoptoadNotifier)
           HoptoadNotifier.notify_or_ignore(e)
+        elsif defined?(Bugsnag)
+          Bugsnag.notify(e)
         end
       end
 
-      def notify_via_airbrake?(msg, options)
-        msg.is_a?(Exception) && options[:airbrake_notify] != false
+      def do_error_notification?(msg, options)
+        @options[:error_notification] and options[:error_notification] != false and msg.is_a?(Exception)
       end
     end
   end

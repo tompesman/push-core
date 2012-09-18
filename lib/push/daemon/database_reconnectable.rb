@@ -28,7 +28,7 @@ module Push
             check_database_is_connected
             break
           rescue *adaptor_errors => e
-            Push::Daemon.logger.error(e, :airbrake_notify => false)
+            Push::Daemon.logger.error(e, :error_notification => false)
             sleep_to_avoid_thrashing
           end
         end
