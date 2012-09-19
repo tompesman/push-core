@@ -1,7 +1,5 @@
 # Push
 
-Please note this gem not yet used in production. If you want to help, please contact me.
-
 ## Features
 
 * Multi-App
