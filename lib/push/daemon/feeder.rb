@@ -28,8 +28,8 @@ module Push
       def self.enqueue_notifications
         begin
           with_database_reconnect_and_retry(name) do
+            ready_apps = Push::Daemon::App.ready
             Push::Message.ready_for_delivery.find_each do |notification|
-              ready_apps = Push::Daemon::App.ready
               Push::Daemon::App.deliver(notification) if ready_apps.include?(notification.app)
             end
           end
