@@ -12,21 +12,21 @@
 
 Add to your `GemFile`
 
-    gem push-core
+    gem 'push-core'
 
 and add the push provider to you Gemfile:
 
 For __APNS__ (iOS: Apple Push Notification Services):
 
-    gem push-apns
+    gem 'push-apns'
     
 For __C2DM__ (Android: Cloud to Device Messaging, deprecated by Google, not this gem):
 
-    gem push-c2dm
+    gem 'push-c2dm'
 
 For __GCM__ (Android: Google Cloud Messaging):
 
-    gem push-gcm
+    gem 'push-gcm'
 
 And run `bundle install` to install the gems.
 
