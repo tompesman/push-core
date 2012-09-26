@@ -2,7 +2,7 @@ module Push
   module Daemon
     module DatabaseReconnectable
       def adaptor_errors
-        errors = [ActiveRecord::StatementInvalid]
+        errors = [ActiveRecord::StatementInvalid, ActiveRecord::ConnectionNotEstablished]
         errors << PGError if defined?(PGError)
         errors << Mysql2::Error if defined?(Mysql2)
         errors
@@ -37,7 +37,7 @@ module Push
 
       def reconnect_database
         ActiveRecord::Base.clear_all_connections!
-        ActiveRecord::Base.establish_connection
+        ActiveRecord::Base.establish_connection(ActiveRecord::Base.configurations[ENV['RAILS_ENV']])
       end
 
       def check_database_is_connected

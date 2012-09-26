@@ -39,12 +39,17 @@ module Push
     protected
 
     def self.rescale_poolsize(size)
-      # 1 feeder + providers
-      size = 1 + size
-
       h = ActiveRecord::Base.connection_config
-      h[:pool] = size
+      # 1 feeder + providers
+      h[:pool] = 1 + size
+
+      # save the adjustments in the configuration
+      ActiveRecord::Base.configurations[ENV['RAILS_ENV']] = h
+
+      # apply new configuration
+      ActiveRecord::Base.clear_all_connections!
       ActiveRecord::Base.establish_connection(h)
+
       logger.info("[Daemon] Rescaled ActiveRecord ConnectionPool size to #{size}")
     end
 
