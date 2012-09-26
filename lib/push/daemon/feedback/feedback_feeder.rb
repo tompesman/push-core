@@ -16,9 +16,9 @@ module Push
         def start
           Thread.new do
             loop do
+              interruptible_sleep @poll
               break if @stop
               enqueue_feedback
-              interruptible_sleep @poll
             end
           end
         end
