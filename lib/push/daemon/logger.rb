@@ -3,7 +3,12 @@ module Push
     class Logger
       def initialize(options)
         @options = options
-        open_log unless @options[:foreground]
+
+        if @options[:foreground]
+          STDOUT.sync = true
+        else
+          open_log
+        end
       end
 
       def info(msg)
