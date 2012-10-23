@@ -43,7 +43,7 @@ module Push
       end
 
       def open_log
-        log_file = File.open(File.join(Rails.root, 'log', 'push.log'), 'w')
+        log_file = File.open(File.join(Rails.root, 'log', 'push.log'), 'a')
         log_file.sync = true
         @logger = ActiveSupport::BufferedLogger.new(log_file, Rails.logger.level)
         @logger.auto_flushing = Rails.logger.respond_to?(:auto_flushing) ? Rails.logger.auto_flushing : true
