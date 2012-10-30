@@ -99,7 +99,7 @@ module Push
     def self.write_pid_file
       if !config[:pid_file].blank?
         begin
-          File.open(configuration[:pid_file], 'w') do |f|
+          File.open(config[:pid_file], 'w') do |f|
             f.puts $$
           end
         rescue SystemCallError => e
