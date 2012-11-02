@@ -35,6 +35,8 @@ module Push
         begin
           connection = @connection_pool.checkout(notification.use_connection)
           notification.deliver(connection)
+        rescue DeliveryError => e
+          Push::Daemon.logger.error(e, {:error_notification => e.notify})
         rescue StandardError => e
           Push::Daemon.logger.error(e)
         ensure
