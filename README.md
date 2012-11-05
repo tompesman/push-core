@@ -47,6 +47,8 @@ Push::ConfigurationApns.create(app: 'app_name', connections: 2, enabled: true,
     sandbox: false)
 ```
 
+The `skip_check_for_error` parameter is optional and can be set to `true` or `false`. If set to `true` the APNS service will not check for errors when sending messages. This option should be used in a production environment and improves performance. In production the errors are reported and handled by the feedback service.
+
 C2DM ([see](https://developers.google.com/android/c2dm/)):
 ```ruby
 Push::ConfigurationC2dm.create(app: 'app_name', connections: 2, enabled: true,
