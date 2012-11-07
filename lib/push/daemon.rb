@@ -15,6 +15,7 @@ require 'push/daemon/app'
 
 module Push
   module Daemon
+    extend DatabaseReconnectable
     class << self
       attr_accessor :logger, :config
     end
@@ -23,7 +24,11 @@ module Push
       self.config = config
       self.logger = Logger.new(:foreground => config.foreground, :error_notification => config.error_notification)
       setup_signal_hooks
-      daemonize unless config.foreground
+
+      unless config.foreground
+        daemonize
+        reconnect_database
+      end
       write_pid_file
 
       App.load
