@@ -71,7 +71,7 @@ You can have each provider per app_name and you can have more than one app_name.
 3. Select both the certificate and private key.
 4. Right click and select `Export 2 items...`.
 5. Save the file as `cert.p12`, make sure the File Format is `Personal Information Exchange (p12)`.
-6. If you decide to set a password for your exported certificate, please read the Configuration section below.
+6. If you decide to set a password for your exported certificate, please add a `certificate_password` field with your password to the `Push::ConfigurationApns`.
 7. Convert the certificate to a .pem, where `<environment>` should be `development` or `production`, depending on the certificate you exported.
 
     `openssl pkcs12 -nodes -clcerts -in cert.p12 -out <environment>.pem`
