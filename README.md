@@ -142,6 +142,35 @@ Push runs on Heroku with the following line in the `Procfile`.
 
     push: bundle exec push $RACK_ENV -f
 
+## Capistrano
+
+Capistrano recipe using the pid file.
+```ruby
+after "deploy:stop",    "push:stop"
+after "deploy:start",   "push:start"
+before "deploy:restart", "push:restart"
+
+set(:pushd_pid_file) { "#{current_path}/tmp/pids/push_daemon.pid" }
+
+namespace :push do
+  desc 'Start the push daemon'
+  task :start, :roles => :worker do
+    run "cd #{current_path} ; nohup bundle exec push #{rails_env} -p #{pushd_pid_file} >> #{current_path}/log/push.log 2>&1 &", :pty => false
+  end
+
+  desc 'Stop the push daemon'
+  task :stop, :roles => :worker do
+    run "if [ -d #{current_path} ] && [ -f #{pushd_pid_file} ] && kill -0 `cat #{pushd_pid_file}`> /dev/null 2>&1; then kill -SIGINT `cat #{pushd_pid_file}` ; else echo 'push daemon is not running'; fi"
+  end
+
+  desc "Restart the push daemon"
+  task :restart, :roles => :worker do
+    stop
+    start
+  end
+end
+```
+
 ## Prerequisites
 
 * Rails 3.2.x
