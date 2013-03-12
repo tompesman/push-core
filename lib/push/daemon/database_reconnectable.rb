@@ -3,6 +3,7 @@ module Push
     module DatabaseReconnectable
       def adaptor_errors
         errors = [ActiveRecord::StatementInvalid, ActiveRecord::ConnectionNotEstablished]
+        errors << PG::Error if defined?(PG::Error)
         errors << PGError if defined?(PGError)
         errors << Mysql2::Error if defined?(Mysql2)
         errors
