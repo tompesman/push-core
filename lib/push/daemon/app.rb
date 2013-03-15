@@ -1,6 +1,7 @@
 module Push
   module Daemon
     class App
+      extend DatabaseReconnectable
       class << self
         attr_reader :apps
       end
@@ -8,12 +9,14 @@ module Push
       @apps = {}
 
       def self.load
-        configurations = Push::Configuration.enabled
-        configurations.each do |config|
-          if @apps[config.app] == nil
-            @apps[config.app] = App.new(config.app)
+        with_database_reconnect_and_retry('App.load') do
+          configurations = Push::Configuration.enabled
+          configurations.each do |config|
+            if @apps[config.app] == nil
+              @apps[config.app] = App.new(config.app)
+            end
+            @apps[config.app].configs << config
           end
-          @apps[config.app].configs << config
         end
       end
 
