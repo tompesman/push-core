@@ -40,8 +40,13 @@ module Push
       end
 
       def reconnect_database
-        ActiveRecord::Base.clear_all_connections!
-        ActiveRecord::Base.establish_connection(ActiveRecord::Base.configurations[ENV['RAILS_ENV']])
+        begin
+          ActiveRecord::Base.clear_all_connections!
+        rescue
+          Push::Daemon.logger.error("ActiveRecord::Base.clear_all_connections! failed")
+        ensure
+          ActiveRecord::Base.establish_connection(ActiveRecord::Base.configurations[ENV['RAILS_ENV']])
+        end
       end
 
       def check_database_is_connected
