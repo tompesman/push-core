@@ -37,7 +37,7 @@ module Push
 
         if @options[:foreground]
           puts formatted_msg
-        else
+        elsif @logger
           @logger.send(where, formatted_msg)
         end
       end
@@ -45,8 +45,13 @@ module Push
       def open_log
         log_file = File.open(File.join(Rails.root, 'log', 'push.log'), 'a')
         log_file.sync = true
-        @logger = ActiveSupport::BufferedLogger.new(log_file, Rails.logger.level)
-        @logger.auto_flushing = Rails.logger.respond_to?(:auto_flushing) ? Rails.logger.auto_flushing : true
+
+        if defined?(ActiveSupport::BufferedLogger)
+          @logger = ActiveSupport::BufferedLogger.new(log_file, Rails.logger.level)
+          @logger.auto_flushing = Rails.logger.respond_to?(:auto_flushing) ? Rails.logger.auto_flushing : true
+        elsif defined?(ActiveSupport::Logger)
+          @logger = ActiveSupport::Logger.new(log_file, Rails.logger.level)
+        end
       end
 
       def error_notification(e, options)
