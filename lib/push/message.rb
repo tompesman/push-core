@@ -9,7 +9,7 @@ module Push
     validates :app, :presence => true
     validates :device, :presence => true
 
-    scope :ready_for_delivery, lambda { where('delivered = ? AND failed = ? AND (deliver_after IS NULL OR deliver_after < ?)', false, false, Time.now) }
+    scope :ready_for_delivery, -> { where('delivered = ? AND failed = ? AND (deliver_after IS NULL OR deliver_after < ?)', false, false, Time.now) }
 
     def deliver(connection)
       begin
