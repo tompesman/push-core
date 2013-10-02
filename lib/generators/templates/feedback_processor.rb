@@ -21,7 +21,7 @@ module Push
 
         end
       else
-        Push::Daemon.logger.info("[FeedbackProcessor] Unknown feedback type")
+        Push.logger.info("[FeedbackProcessor] Unknown feedback type")
       end
     end
   end

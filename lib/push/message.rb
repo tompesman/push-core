@@ -23,7 +23,7 @@ module Push
           self.save!(:validate => false)
         end
 
-        Push::Daemon.logger.info("[#{connection.name}] Message #{id} delivered to #{device}")
+        Push.logger.info("[#{connection.name}] Message #{id} delivered to #{device}")
       rescue Push::DeliveryError, Push::DisconnectionError => error
         handle_delivery_error(error, connection)
         raise

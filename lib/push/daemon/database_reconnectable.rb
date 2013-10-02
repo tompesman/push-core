@@ -16,34 +16,34 @@ module Push
         begin
           yield
         rescue *adaptor_errors => e
-          Push::Daemon.logger.error(e)
+          Push.logger.error(e)
           database_connection_lost(name)
           retry
         end
       end
 
       def database_connection_lost(name)
-        Push::Daemon.logger.warn("[#{name}] Lost connection to database, reconnecting...")
+        Push.logger.warn("[#{name}] Lost connection to database, reconnecting...")
         attempts = 0
         loop do
           begin
-            Push::Daemon.logger.warn("[#{name}] Attempt #{attempts += 1}")
+            Push.logger.warn("[#{name}] Attempt #{attempts += 1}")
             reconnect_database
             check_database_is_connected
             break
           rescue *adaptor_errors => e
-            Push::Daemon.logger.error(e, :error_notification => false)
+            Push.logger.error(e, :error_notification => false)
             sleep_to_avoid_thrashing
           end
         end
-        Push::Daemon.logger.warn("[#{name}] Database reconnected")
+        Push.logger.warn("[#{name}] Database reconnected")
       end
 
       def reconnect_database
         begin
           ActiveRecord::Base.clear_all_connections!
         rescue
-          Push::Daemon.logger.error("ActiveRecord::Base.clear_all_connections! failed")
+          Push.logger.error("ActiveRecord::Base.clear_all_connections! failed")
         ensure
           ActiveRecord::Base.establish_connection(ActiveRecord::Base.configurations[ENV['RAILS_ENV']])
         end
@@ -56,6 +56,21 @@ module Push
 
       def sleep_to_avoid_thrashing
         sleep 2
+      end
+
+      def self.rescale_poolsize(name, size)
+        h = ActiveRecord::Base.connection_config
+        # 1 feeder + providers
+        h[:pool] = 1 + size
+
+        # save the adjustments in the configuration
+        ActiveRecord::Base.configurations[ENV['RAILS_ENV']] = h
+
+        # apply new configuration
+        ActiveRecord::Base.clear_all_connections!
+        ActiveRecord::Base.establish_connection(h)
+
+        Push.logger.info("[#{name}] Rescaled ActiveRecord ConnectionPool size to #{size}")
       end
     end
   end

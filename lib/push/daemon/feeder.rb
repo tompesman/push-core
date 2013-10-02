@@ -2,25 +2,27 @@ module Push
   module Daemon
     class Feeder
       extend DatabaseReconnectable
-      extend InterruptibleSleep
 
       def self.name
         "Feeder"
       end
 
-      def self.start(config)
-        reconnect_database unless config.foreground
+      def self.start
+        @interruptible_sleeper = InterruptibleSleep.new(Push.config.push_poll)
+        reconnect_database unless Push.config.foreground
 
         loop do
-          break if @stop
           enqueue_notifications
-          interruptible_sleep config.push_poll
+          break if @stop or Push.config.single_run
+          @interruptible_sleeper.sleep
         end
+        Push.logger.info "[#{name}] stopped"
       end
 
       def self.stop
+        Push.logger.info "[#{name}] stopping"
         @stop = true
-        interrupt_sleep
+        @interrupt_sleeper.interrupt_sleep if @interrupt_sleeper
       end
 
       protected
@@ -34,7 +36,7 @@ module Push
             end
           end
         rescue StandardError => e
-          Push::Daemon.logger.error(e)
+          Push.logger.error(e)
         end
       end
     end

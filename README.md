@@ -89,6 +89,7 @@ Where `<environment>` is your Rails environment and `<options>` can be:
     -f, --foreground                 Run in the foreground. Log is not written.
     -p, --pid-file PATH              Path to write PID file. Relative to Rails root unless absolute.
     -P, --push-poll N                Frequency in seconds to check for new notifications. Default: 2.
+    -s, --single-run                 Only checks once for unsend push messages and exits afterwards.
     -n, --error-notification         Enables error notifications via Airbrake or Bugsnag.
     -F, --feedback-poll N            Frequency in seconds to check for feedback for the feedback processor. Default: 60. Use 0 to disable.
     -b, --feedback-processor PATH    Path to the feedback processor. Default: lib/push/feedback_processor.
@@ -129,6 +130,29 @@ Push::MessageGcm.create(
 ## Feedback processing
 
 The push providers return feedback in various ways and these are captured and stored in the `push_feedback` table. The installer installs the `lib/push/feedback_processor.rb` file which is by default called every 60 seconds. In this file you can process the feedback which is different for every application.
+
+## Embedding and single run
+
+You can embed the daemon in your process using:
+```ruby
+Thread.new {
+    Push::Embed.continuous
+}
+```
+and you can stop the daemon using:
+```ruby
+Push::Embed.shutdown
+```
+
+You can also run the daemon once to clear the message queue from your code:
+```ruby
+Push::Embed.single_run
+```
+or from the commandline using the `-s` option:
+
+```bash
+bundle exec push development -f -s
+```
 
 ## Maintenance
 
@@ -173,8 +197,8 @@ end
 
 ## Prerequisites
 
-* Rails 3.2.x
-* Ruby 1.9.x
+* Rails 3.2.x, 4.0.x
+* Ruby 1.9.x, 2.0.x
 
 ## Thanks
 

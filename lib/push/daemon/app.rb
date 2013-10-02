@@ -6,9 +6,8 @@ module Push
         attr_reader :apps
       end
 
-      @apps = {}
-
       def self.load
+        @apps = {}
         with_database_reconnect_and_retry('App.load') do
           configurations = Push::Configuration.enabled
           configurations.each do |config|
@@ -24,6 +23,10 @@ module Push
         ready = []
         @apps.each { |app, runner| ready << app if runner.ready? }
         ready
+      end
+
+      def self.all_ready?
+        ready.size == @apps.size
       end
 
       def self.deliver(notification)
@@ -51,7 +54,7 @@ module Push
         @configs = []
         @handlers = []
         @providers = []
-        @queue = DeliveryQueue.new
+        @queue = Queue.new
         @database_connections = 0
       end
 
@@ -76,12 +79,16 @@ module Push
       end
 
       def stop
+        Push.logger.info "[#{@name}] stopping"
         @handlers.map(&:stop)
+        @handlers.map(&:wakeup)
+        @handlers.map(&:wait)
         @providers.map(&:stop)
+        Push.logger.info "[#{@name}] stopped"
       end
 
       def ready?
-        @queue.notifications_processed?
+        @queue.empty?
       end
 
       protected

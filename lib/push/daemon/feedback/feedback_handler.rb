@@ -2,12 +2,15 @@ module Push
   module Daemon
     module Feedback
       class FeedbackHandler
-        attr_reader :name
+        EXIT = :exit
 
         def initialize(processor)
-          @name = "FeedbackHandler"
           @queue = Push::Daemon::Feedback.queue
           require processor
+        end
+
+        def name
+          "FeedbackHandler"
         end
 
         def start
@@ -21,25 +24,22 @@ module Push
 
         def stop
           @stop = true
-          @queue.wakeup(@thread)
+          @queue.push(EXIT) if @thread
+          @thread.join if @thread
         end
 
         protected
 
         def handle_next_feedback
-          begin
-            feedback = @queue.pop
-          rescue DeliveryQueue::WakeupError
-            return
-          end
+          feedback = @queue.pop
+          return if feedback == EXIT
 
           begin
             Push::FeedbackProcessor.process(feedback)
           rescue StandardError => e
-            Push::Daemon.logger.error(e)
+            Push.logger.error(e)
           ensure
-            feedback.is_processed(@name)
-            @queue.notification_processed
+            feedback.is_processed(name)
           end
         end
       end

@@ -5,11 +5,15 @@ module Push
         attr_accessor :queue, :handler, :feeder
       end
 
-      def self.load(config)
-        return if config.feedback_poll == 0
-        self.queue = DeliveryQueue.new
-        self.handler = Feedback::FeedbackHandler.new(Rails.root + config.feedback_processor)
-        self.feeder = Feedback::FeedbackFeeder.new(config.feedback_poll)
+      def self.name
+        "Feedback"
+      end
+
+      def self.load
+        return if Push.config.feedback_poll == 0
+        self.queue = Queue.new
+        self.handler = Feedback::FeedbackHandler.new(Rails.root + Push.config.feedback_processor)
+        self.feeder = Feedback::FeedbackFeeder.new(Push.config.feedback_poll)
       end
 
       def self.start
@@ -21,8 +25,10 @@ module Push
 
       def self.stop
         return unless @started
+        Push.logger.info "[#{name}] stopping"
         self.feeder.stop
         self.handler.stop
+        Push.logger.info "[#{name}] stopped"
       end
 
       def self.database_connections

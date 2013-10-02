@@ -18,8 +18,13 @@ module Push
         @connections[connection.class.to_s].push(connection)
       end
 
-      def checkout(notification_type)
-        @connections[notification_type.to_s].pop
+      def checkout(notification, name)
+        notification_type = notification.use_connection
+        if @connections.has_key?(notification_type.to_s)
+          @connections[notification_type.to_s].pop
+        else
+          raise Push::DeliveryError.new(0, notification.id, "Unknown app: #{notification_type.to_s}", name, true)
+        end
       end
 
       def size

@@ -3,10 +3,9 @@ module Push
     module Feedback
       class FeedbackFeeder
         include ::Push::Daemon::DatabaseReconnectable
-        include ::Push::Daemon::InterruptibleSleep
 
         def initialize(poll)
-          @poll = poll
+          @interruptible_sleeper = InterruptibleSleep.new(poll)
         end
 
         def name
@@ -14,9 +13,9 @@ module Push
         end
 
         def start
-          Thread.new do
+          @thread = Thread.new do
             loop do
-              interruptible_sleep @poll
+              @interruptible_sleeper.sleep
               break if @stop
               enqueue_feedback
             end
@@ -25,7 +24,8 @@ module Push
 
         def stop
           @stop = true
-          interrupt_sleep
+          @interruptible_sleeper.interrupt_sleep
+          @thread.join if @thread
         end
 
         protected
@@ -33,14 +33,14 @@ module Push
         def enqueue_feedback
           begin
             with_database_reconnect_and_retry(name) do
-              if Push::Daemon::Feedback.queue.notifications_processed?
+              if Push::Daemon::Feedback.queue.empty?
                 Push::Feedback.ready_for_followup.find_each do |feedback|
                   Push::Daemon::Feedback.queue.push(feedback)
                 end
               end
             end
           rescue StandardError => e
-            Push::Daemon.logger.error(e)
+            Push.logger.error(e)
           end
         end
       end
