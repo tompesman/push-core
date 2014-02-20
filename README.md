@@ -108,6 +108,20 @@ Push::MessageApns.create(
     expiry: 1.day.to_i, 
     attributes_for_device: {key: 'MSG'})
 ```
+
+Silent Push Notification via APNS:
+
+```ruby
+Push::MessageApns.create(
+    app: 'app_name',
+    device: '<APNS device_token here>',
+    alert: nil,
+    sound: nil,
+    badge: 1,
+    expiry: 1.day.to_i, 
+    attributes_for_device: nil)
+```
+
 C2DM:
 ```ruby
 Push::MessageC2dm.create(
