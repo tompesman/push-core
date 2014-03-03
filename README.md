@@ -118,9 +118,13 @@ Push::MessageApns.create(
     alert: nil,
     sound: nil,
     badge: 1,
+    content_available: 1,   # see footnote
     expiry: 1.day.to_i, 
     attributes_for_device: nil)
 ```
+
+Use `content_available: 1` if the iOS device should start your app upon receiving the silent push notification.
+
 
 C2DM:
 ```ruby
