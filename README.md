@@ -188,6 +188,9 @@ namespace :push do
   end
 end
 ```
+## Mina
+
+If you're using (Mina) [https://github.com/mina-deploy/mina] for deployment, you can use (mina-push-core) [https://github.com/starchow/mina-push-core] to make the push-core work on the server.
 
 ## Prerequisites
 
