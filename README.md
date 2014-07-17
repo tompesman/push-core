@@ -1,5 +1,7 @@
 # Push
 
+Please also have a look at the latest push daemon: [Pushr](https://github.com/9to5/pushr-core), a push daemon using Redis for queueing. It's fast and lightweight!
+
 ## Features
 
 * Multi-App
