@@ -21,7 +21,7 @@ and add the push provider to you Gemfile:
 For __APNS__ (iOS: Apple Push Notification Services):
 
     gem 'push-apns'
-    
+
 For __C2DM__ (Android: Cloud to Device Messaging, deprecated by Google, not this gem):
 
     gem 'push-c2dm'
@@ -41,7 +41,7 @@ To generate the migration and the configuration files run:
 
 The configuration is in the database and you add the configuration per push provider with the console (`rails c`):
 
-APNS ([see](https://github.com/tompesman/push-core#generating-certificates)):
+APNS ([see](https://github.com/tompesman/push-core#user-content-generating-certificates-for-apns)):
 ```ruby
 Push::ConfigurationApns.create(app: 'app_name', connections: 2, enabled: true,
     certificate: File.read('certificate.pem'),
@@ -77,7 +77,7 @@ You can have each provider per app_name and you can have more than one app_name.
 7. Convert the certificate to a .pem, where `<environment>` should be `development` or `production`, depending on the certificate you exported.
 
     `openssl pkcs12 -nodes -clcerts -in cert.p12 -out <environment>.pem`
-      
+
 8. Move the .pem file somewhere where you can use the `File.read` to load the file in the database.
 
 ## Daemon
@@ -85,7 +85,7 @@ You can have each provider per app_name and you can have more than one app_name.
 To start the daemon:
 
     bundle exec push <environment> <options>
-    
+
 Where `<environment>` is your Rails environment and `<options>` can be:
 
     -f, --foreground                 Run in the foreground. Log is not written.
@@ -107,7 +107,7 @@ Push::MessageApns.create(
     alert: 'Hello World',
     sound: '1.aiff',
     badge: 1,
-    expiry: 1.day.to_i, 
+    expiry: 1.day.to_i,
     attributes_for_device: {key: 'MSG'})
 ```
 
@@ -121,7 +121,7 @@ Push::MessageApns.create(
     sound: nil,
     badge: 1,
     content_available: 1,   # see footnote
-    expiry: 1.day.to_i, 
+    expiry: 1.day.to_i,
     attributes_for_device: nil)
 ```
 
