@@ -63,6 +63,8 @@ module Push
           HoptoadNotifier.notify_or_ignore(e)
         elsif defined?(Bugsnag)
           Bugsnag.notify(e)
+        elsif defined?(Honeybadger)
+          Honeybadger.notify(e)
         end
       end
 

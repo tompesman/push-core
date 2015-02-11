@@ -91,7 +91,7 @@ Where `<environment>` is your Rails environment and `<options>` can be:
     -f, --foreground                 Run in the foreground. Log is not written.
     -p, --pid-file PATH              Path to write PID file. Relative to Rails root unless absolute.
     -P, --push-poll N                Frequency in seconds to check for new notifications. Default: 2.
-    -n, --error-notification         Enables error notifications via Airbrake or Bugsnag.
+    -n, --error-notification         Enables error notifications via Airbrake, Bugsnag or Honeybadger.
     -F, --feedback-poll N            Frequency in seconds to check for feedback for the feedback processor. Default: 60. Use 0 to disable.
     -b, --feedback-processor PATH    Path to the feedback processor. Default: lib/push/feedback_processor.
     -v, --version                    Print this version of push.
