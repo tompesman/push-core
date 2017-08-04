@@ -51,7 +51,7 @@ module Push
 
       def check_database_is_connected
         # Simply asking the adapter for the connection state is not sufficient.
-        Push::Message.count
+        Push::Message.take
       end
 
       def sleep_to_avoid_thrashing
